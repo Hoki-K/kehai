@@ -1,0 +1,904 @@
+<title>けはい</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one quiet column, like a pocket notebook. The listening "ear" is the only loud object; everything else stays out of the way. */
+:root{
+  --bg:#EDF0F2; --surface:#F8F9FA; --ink:#1B2130; --muted:#5A6373; --line:#D2D8DF;
+  --accent:#C2701F; --accent-soft:rgba(194,112,31,.14);
+  --t-laugh:#B67B10; --t-sing:#3A8560; --t-chat:#4867B8; --t-shout:#B9505B;
+  --pocket-bg:#000; --pocket-ink:#6E6E6E;
+  --f-display:"Klee One","Hiragino Maru Gothic ProN","Yu Gothic",system-ui,sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  --f-num:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1218; --surface:#171B23; --ink:#E8E5DC; --muted:#9AA1AE; --line:#2B313C;
+  --accent:#E6A157; --accent-soft:rgba(230,161,87,.16);
+  --t-laugh:#E0AE4C; --t-sing:#6CBB8E; --t-chat:#88A5EA; --t-shout:#E48A93; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1218; --surface:#171B23; --ink:#E8E5DC; --muted:#9AA1AE; --line:#2B313C;
+  --accent:#E6A157; --accent-soft:rgba(230,161,87,.16);
+  --t-laugh:#E0AE4C; --t-sing:#6CBB8E; --t-chat:#88A5EA; --t-shout:#E48A93; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.shell{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px calc(84px + env(safe-area-inset-bottom,0px))}
+.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-block:8px 4px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.mark{font-family:var(--f-display);font-weight:600;font-size:28px;letter-spacing:.06em}
+.sub{color:var(--muted);font-size:12px;letter-spacing:.12em}
+.badge{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 10px;white-space:nowrap}
+.view{display:flex;flex-direction:column;gap:20px;padding-top:8px}
+h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+.btn{appearance:none;border:1px solid var(--line);background:transparent;border-radius:999px;padding:10px 20px;cursor:pointer;line-height:1.3;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px}
+.btn:focus-visible,.tabs button:focus-visible,.icon:focus-visible,.note-in:focus-visible,select:focus-visible,.seg input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700;padding-inline:28px}
+.btn.primary.on{background:transparent;color:var(--ink)}
+.btn.small{min-height:36px;padding:6px 14px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* listen */
+.ear-wrap{position:relative;width:min(78vw,300px);aspect-ratio:1;max-width:100%;margin:8px auto 0}
+.ear-wrap canvas{width:100%;height:100%;display:block}
+.ear-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.ear-state{font-family:var(--f-display);font-weight:600;font-size:19px;letter-spacing:.04em}
+.ear-time{font-family:var(--f-num);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lead{text-align:center;color:var(--muted);font-size:14px;max-width:32em;margin:0 auto}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.note{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.today{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.today-row{display:flex;flex-direction:column;padding:12px 4px;gap:2px}
+.today-row+.today-row{border-left:1px solid var(--line);padding-left:16px}
+.today-row span{font-size:12px;color:var(--muted);letter-spacing:.06em}
+.today-row strong{font-family:var(--f-num);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.file-box{display:flex;flex-direction:column;gap:10px;padding:16px;background:var(--surface);border-radius:16px}
+.file-box h3{font-size:15px}
+.file-box p{font-size:13px;color:var(--muted)}
+.file-box .btn{align-self:flex-start}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.prog{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ink);transition:width .2s}
+
+/* log */
+.day{display:flex;flex-direction:column;gap:8px}
+.day+.day{margin-top:12px}
+.day-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.day-head h2{font-family:var(--f-display);font-weight:600;font-size:20px}
+.day-head p{font-size:12px;color:var(--muted)}
+.moments{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.moment{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.moment:last-child{border-bottom:0}
+.play{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--tag);background:transparent;color:var(--tag);display:grid;place-items:center;cursor:pointer;padding:0}
+.play svg{width:18px;height:18px;fill:currentColor}
+.play.playing{background:var(--tag);color:var(--surface)}
+.m-body{display:flex;flex-direction:column;gap:4px;min-width:0}
+.m-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.time{font-family:var(--f-num);font-size:14px;color:var(--ink);font-variant-numeric:tabular-nums}
+.chip{color:var(--tag);font-weight:700;letter-spacing:.06em}
+.wave{width:100%;height:26px;display:block;color:var(--tag)}
+.note-in{border:0;border-bottom:1px dashed transparent;background:transparent;padding:2px 0;font-size:13px;width:100%;min-width:0}
+.note-in::placeholder{color:var(--muted);opacity:.7}
+.note-in:hover{border-bottom-color:var(--line)}
+.m-tools{display:flex;gap:2px}
+.icon{width:40px;height:40px;border:0;background:transparent;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--muted);padding:0}
+.icon svg{width:18px;height:18px;fill:currentColor}
+.icon[data-act="fav"] svg{fill:none;stroke:currentColor;stroke-width:1.8}
+.icon[aria-pressed="true"]{color:var(--t-shout)}
+.icon[aria-pressed="true"] svg{fill:currentColor}
+.icon.confirm{width:auto;padding:0 10px;border-radius:999px;background:var(--t-shout);color:var(--surface);font-size:12px;font-weight:700}
+.tag-laugh{--tag:var(--t-laugh)} .tag-sing{--tag:var(--t-sing)} .tag-chat{--tag:var(--t-chat)} .tag-shout{--tag:var(--t-shout)}
+.example{opacity:.62}
+.example .play{cursor:default}
+.empty-note{font-size:13px;color:var(--muted);background:var(--surface);border-radius:12px;padding:12px 14px}
+
+/* settings */
+.set-group{display:flex;flex-direction:column;gap:10px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.set-group h3{font-size:14px;letter-spacing:.06em}
+.set-group p{font-size:13px;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg label{flex:1;min-width:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;padding:7px 8px;border-radius:999px;cursor:pointer;font-size:13px}
+.seg input:checked+span{background:var(--ink);color:var(--bg);font-weight:700}
+select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.row-btns{display:flex;flex-wrap:wrap;gap:8px}
+.privacy{margin:0;padding-left:1.2em;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+
+/* tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:4px;background:var(--bg);border-top:1px solid var(--line);padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
+.tabs button{flex:0 1 160px;border:0;background:transparent;padding:10px 0;font-size:14px;color:var(--muted);cursor:pointer;border-radius:12px;letter-spacing:.12em;position:relative}
+.tabs button[aria-current="page"]{color:var(--ink);font-weight:700}
+.tabs button[aria-current="page"]::after{content:"";position:absolute;left:50%;bottom:4px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
+.tabs .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:6px;vertical-align:middle}
+
+/* pocket */
+.pocket{position:fixed;inset:0;background:var(--pocket-bg);color:var(--pocket-ink);z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px max(24px,env(safe-area-inset-right,0px)) 24px max(24px,env(safe-area-inset-left,0px));user-select:none;-webkit-user-select:none}
+.pocket .p-state{font-family:var(--f-display);font-weight:600;font-size:18px;letter-spacing:.08em}
+.pocket .p-sub{font-size:12px}
+.pocket .lamp{width:8px;height:8px;border-radius:50%;background:var(--pocket-ink);opacity:.6}
+.pocket.cap .lamp{background:var(--accent);opacity:1}
+
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:30;max-width:calc(100vw - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){.toast,.bar i{transition:none}}
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="brand"><span class="mark">けはい</span><span class="sub">音だけの思い出帳</span></div>
+    <span class="badge" id="buildBadge">試作 0.1</span>
+  </header>
+
+  <main>
+    <section id="view-listen" class="view" aria-label="きく">
+      <div class="ear-wrap">
+        <canvas id="ear" aria-hidden="true"></canvas>
+        <div class="ear-center"><div id="earState" class="ear-state">しずかです</div><div id="earTime" class="ear-time">止まっています</div></div>
+      </div>
+      <p class="lead" id="listenLead">ポケットに入れておくだけ。笑い声や歌、おしゃべりが聞こえたら、その前後20秒だけを残します。ほかの音は端末の中ですぐ消えます。</p>
+      <div class="actions">
+        <button id="btnListen" class="btn primary" type="button">耳をすます</button>
+        <button id="btnPocket" class="btn" type="button" hidden>ポケットモード</button>
+      </div>
+      <p id="micNote" class="note" hidden></p>
+      <div class="today">
+        <div class="today-row"><span>きょう拾った瞬間</span><strong id="todayCount">0</strong></div>
+        <div class="today-row"><span>耳をすませた時間</span><strong id="todayListen">0分</strong></div>
+      </div>
+      <div class="file-box">
+        <h3>録音ファイルから拾う</h3>
+        <p>ピンマイクやボイスメモで録った音、動画の音から、心が動いた瞬間を探します。長さの目安は20分以内です。</p>
+        <label class="btn" for="fileIn">ファイルを選ぶ</label>
+        <input id="fileIn" class="vh" type="file" accept="audio/*,video/*">
+        <div id="fileProg" class="prog" hidden><div class="bar"><i id="fileBar"></i></div><span id="fileMsg"></span></div>
+      </div>
+    </section>
+
+    <section id="view-log" class="view" aria-label="きろく" hidden>
+      <div id="days"></div>
+    </section>
+
+    <section id="view-settings" class="view" aria-label="せってい" hidden>
+      <div class="set-group">
+        <h3>拾う感度</h3>
+        <div class="seg" role="radiogroup" aria-label="拾う感度">
+          <label><input type="radio" name="sens" id="sens-low" value="low"><span>控えめ</span></label>
+          <label><input type="radio" name="sens" id="sens-mid" value="mid"><span>ふつう</span></label>
+          <label><input type="radio" name="sens" id="sens-high" value="high"><span>たくさん</span></label>
+        </div>
+        <p>「たくさん」は取りこぼしが減るかわりに、ただの物音も拾いやすくなります。</p>
+      </div>
+      <div class="set-group">
+        <h3>ひとつの瞬間の長さ</h3>
+        <select id="lenSel" aria-label="ひとつの瞬間の長さ">
+          <option value="15">15秒（前6秒・後9秒）</option>
+          <option value="20">20秒（前8秒・後12秒）</option>
+          <option value="30">30秒（前12秒・後18秒）</option>
+        </select>
+        <p>声が続いているあいだは、最大1.5倍まで延びます。</p>
+      </div>
+      <div class="set-group">
+        <h3>1日に残す数</h3>
+        <select id="capSel" aria-label="1日に残す数">
+          <option value="10">10個まで</option>
+          <option value="20">20個まで</option>
+          <option value="40">40個まで</option>
+        </select>
+        <p>上限をこえると、お気に入り以外でいちばん印象の弱い瞬間と入れ替えます。</p>
+      </div>
+      <div class="set-group">
+        <h3>マイク</h3>
+        <select id="micSel" aria-label="マイク"><option value="">端末の標準マイク</option></select>
+        <p>ワイヤレスピンマイクの受信機をつなぐと、ここに出てきます。一度「耳をすます」を押すと一覧が読み込まれます。</p>
+      </div>
+      <div class="set-group">
+        <h3>音の扱い</h3>
+        <p>空気感を残すため、雑音除去や音量の自動調整はかけずに、そのまま残します。声をくっきりさせる処理は、あとから選べるようにする予定です。</p>
+      </div>
+      <div class="set-group">
+        <h3>データ</h3>
+        <p id="usage">保存している瞬間はありません。</p>
+        <div class="row-btns">
+          <button id="btnExport" class="btn small" type="button">すべてzipで保存</button>
+          <button id="btnWipe" class="btn small" type="button">すべて消す</button>
+        </div>
+      </div>
+      <div class="set-group">
+        <h3>このアプリについて</h3>
+        <ul class="privacy">
+          <li>音の解析はすべてこの端末の中で行い、どこにも送りません。</li>
+          <li>残すのは、拾った瞬間の前後だけです。それ以外の音は保存しません。</li>
+          <li>拾う判定は試作段階の簡単な仕組みです。外れることがあります。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabs" aria-label="画面の切り替え">
+  <button type="button" data-view="listen" aria-current="page">きく</button>
+  <button type="button" data-view="log">きろく<span id="newDot" class="dot" hidden></span></button>
+  <button type="button" data-view="settings">せってい</button>
+</nav>
+
+<div id="pocket" class="pocket" hidden>
+  <div class="lamp"></div>
+  <div class="p-state" id="pState">耳をすませています</div>
+  <div class="p-sub" id="pSub">きょう 0 の瞬間</div>
+  <div class="p-sub">画面を2回タップすると戻ります</div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+/* ---------- constants ---------- */
+const SR = 24000, HOP = 512, WIN = 1024, FPS = SR / HOP;
+const TAGS = { laugh: '笑い声', sing: 'うた', chat: 'おしゃべり', shout: '大きな声' };
+const SENS = { low: 1.12, mid: 1.0, high: 0.86 };
+const BASE_THR = 0.7;
+const $ = (s, r = document) => r.querySelector(s);
+const inViewer = typeof window.claude === 'object' && window.claude && typeof window.claude.use === 'function';
+
+/* ---------- settings ---------- */
+const DEFAULTS = { sens: 'mid', len: 20, cap: 20, mic: '' };
+function loadJSON(k, d) { try { const v = localStorage.getItem(k); return v ? Object.assign({}, d, JSON.parse(v)) : Object.assign({}, d); } catch (e) { return Object.assign({}, d); } }
+function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+const settings = loadJSON('kehai.settings', DEFAULTS);
+const stats = loadJSON('kehai.stats', {});
+
+/* ---------- detector ---------- */
+class Detector {
+  constructor() {
+    this.win = new Float32Array(WIN); this.q = new Float32Array(HOP); this.qn = 0; this.frames = 0;
+    this.floor = null; this.H = 256; this.hi = 0; this.count = 0;
+    this.rel = new Float32Array(this.H); this.f0 = new Float32Array(this.H); this.conf = new Float32Array(this.H); this.vo = new Uint8Array(this.H);
+    this.dec = new Float32Array(WIN / 2); this.ac = new Float32Array(120);
+    this.s1 = new Float32Array(this.H); this.s2 = new Float32Array(this.H); this.s3 = new Float32Array(this.H); this.s4 = new Uint8Array(this.H);
+    this.thr = BASE_THR; this.level = 0; this.lastRel = 0; this.vref = 18;
+  }
+  setSens(mult) { this.thr = BASE_THR * mult; }
+  feed(x) {
+    const out = [];
+    let i = 0;
+    while (i < x.length) {
+      const n = Math.min(HOP - this.qn, x.length - i);
+      this.q.set(x.subarray(i, i + n), this.qn); this.qn += n; i += n;
+      if (this.qn === HOP) {
+        this.win.copyWithin(0, HOP); this.win.set(this.q, WIN - HOP); this.qn = 0; this.frames++;
+        if (this.frames >= 2) { const ev = this.step(); if (ev) { ev.at = this.frames * HOP; out.push(ev); } }
+      }
+    }
+    return out;
+  }
+  analyze() {
+    const w = this.win; let m = 0;
+    for (let i = 0; i < WIN; i++) m += w[i];
+    m /= WIN;
+    let e = 0;
+    for (let i = 0; i < WIN; i++) { const v = w[i] - m; e += v * v; }
+    const db = 10 * Math.log10(e / WIN + 1e-12);
+    if (this.floor === null) this.floor = db;
+    else if (db < this.floor) this.floor += (db - this.floor) * 0.1;
+    else this.floor += (db - this.floor) * 0.004;
+    if (this.floor < -90) this.floor = -90;
+    const rel = db - this.floor;
+    let f0 = 0, conf = 0;
+    if (rel > 5) {
+      const d = this.dec, N = d.length;
+      let e2 = 0;
+      for (let j = 0; j < N; j++) { const v = (w[2 * j] + w[2 * j + 1]) * 0.5 - m; d[j] = v; e2 += v * v; }
+      if (e2 > 1e-10) {
+        const minL = 13, maxL = 110, ac = this.ac; let best = 0;
+        for (let L = minL; L <= maxL; L++) {
+          let r = 0;
+          for (let j = 0; j < N - L; j++) r += d[j] * d[j + L];
+          const nr = r / (e2 * (N - L) / N);
+          ac[L] = nr; if (nr > best) best = nr;
+        }
+        if (best > 0.3) {
+          for (let L = minL + 1; L < maxL; L++) {
+            if (ac[L] >= best * 0.9 && ac[L] >= ac[L - 1] && ac[L] >= ac[L + 1]) { f0 = (SR / 2) / L; conf = ac[L]; break; }
+          }
+        }
+      }
+    }
+    return { rel, f0, conf };
+  }
+  push(a) {
+    const k = this.hi; this.rel[k] = a.rel; this.f0[k] = a.f0; this.conf[k] = a.conf;
+    this.vo[k] = (a.conf >= 0.45 && a.rel >= 6 && a.f0 > 0) ? 1 : 0;
+    if (this.vo[k]) this.vref += (a.rel - this.vref) * 0.01;
+    this.hi = (k + 1) % this.H; this.count++;
+  }
+  last(arr, n, out) { const H = this.H; for (let i = 0; i < n; i++) out[i] = arr[(this.hi - n + i + H * 2) % H]; return out; }
+  step() {
+    const a = this.analyze(); this.push(a);
+    this.lastRel = a.rel; this.level += (Math.max(0, Math.min(1, a.rel / 30)) - this.level) * 0.25;
+    if (this.count < 30) return null;
+    const scores = { laugh: this.laugh(), sing: this.sing(), chat: this.chat(), shout: this.shout() };
+    let bt = null, bs = 0;
+    for (const t in scores) if (scores[t] > bs) { bs = scores[t]; bt = t; }
+    return bs >= this.thr ? { type: bt, score: bs } : null;
+  }
+  median(vals) { if (!vals.length) return 0; const s = vals.slice().sort((x, y) => x - y); return s[s.length >> 1]; }
+  laugh() {
+    const n = Math.min(this.count, 103); if (n < 60) return 0;
+    const r = this.last(this.rel, n, this.s1), e = this.s2, vo = this.last(this.vo, n, this.s4), f = this.last(this.f0, n, this.s3);
+    for (let i = 0; i < n; i++) e[i] = (r[Math.max(0, i - 1)] + r[i] + r[Math.min(n - 1, i + 1)]) / 3;
+    const peaks = []; let minSince = Infinity;
+    for (let i = 2; i < n - 2; i++) {
+      if (e[i] < minSince) minSince = e[i];
+      if (e[i] >= 9 && e[i] >= e[i - 1] && e[i] >= e[i + 1] && e[i] >= e[i - 2] && e[i] >= e[i + 2] && e[i] - minSince >= 5) {
+        if (peaks.length && i - peaks[peaks.length - 1] < 4) continue;
+        peaks.push(i); minSince = e[i];
+      }
+    }
+    if (peaks.length < 5) return 0;
+    // longest chain with laugh-like spacing (130-320 ms)
+    let bestChain = [], chain = [peaks[0]];
+    for (let k = 1; k < peaks.length; k++) {
+      const d = peaks[k] - peaks[k - 1];
+      if (d >= 6 && d <= 15) chain.push(peaks[k]); else { if (chain.length > bestChain.length) bestChain = chain; chain = [peaks[k]]; }
+    }
+    if (chain.length > bestChain.length) bestChain = chain;
+    const P = bestChain.length; if (P < 5) return 0;
+    const iv = []; for (let k = 1; k < P; k++) iv.push(bestChain[k] - bestChain[k - 1]);
+    const mean = iv.reduce((s, v) => s + v, 0) / iv.length;
+    const sd = Math.sqrt(iv.reduce((s, v) => s + (v - mean) * (v - mean), 0) / iv.length);
+    const cv = sd / mean; if (cv > 0.28) return 0;
+    let voicedPeaks = 0, loud = 0; const fs = [], pf = [];
+    for (const p of bestChain) {
+      loud += e[p];
+      const local = []; for (let j = Math.max(0, p - 2); j <= Math.min(n - 1, p + 2); j++) if (vo[j]) local.push(f[j]);
+      if (local.length) { voicedPeaks++; fs.push(...local); pf.push(this.median(local)); }
+    }
+    if (voicedPeaks / P < 0.5) return 0;
+    const med = this.median(fs); if (med < 200) return 0;
+    // the "ha"s of a laugh sit at a similar pitch; speech syllables wander
+    const pm = pf.reduce((s, v) => s + v, 0) / pf.length;
+    const pcv = Math.sqrt(pf.reduce((s, v) => s + (v - pm) * (v - pm), 0) / pf.length) / pm;
+    if (pcv > 0.09) return 0;
+    loud /= P;
+    return 0.5 + 0.1 * Math.min(3, P - 5) + 0.25 * (1 - Math.min(1, cv / 0.28)) + 0.2 * Math.min(1, loud / 24) + (med >= 300 ? 0.1 : 0);
+  }
+  sing() {
+    const n = Math.min(this.count, 188); if (n < 120) return 0;
+    const vo = this.last(this.vo, n, this.s4), f = this.last(this.f0, n, this.s3), c = this.last(this.conf, n, this.s1);
+    let voiced = 0; for (let i = 0; i < n; i++) voiced += vo[i];
+    const vf = voiced / n; if (vf < 0.45) return 0;
+    const notes = []; let run = [];
+    const close = () => {
+      if (run.length >= 7) {
+        const med = this.median(run); let stable = 0;
+        for (const v of run) if (Math.abs(v - med) / med <= 0.04) stable++;
+        if (stable / run.length >= 0.6) notes.push({ len: run.length, med });
+      }
+      run = [];
+    };
+    for (let i = 0; i < n; i++) { if (vo[i] && c[i] >= 0.55) run.push(f[i]); else close(); }
+    close();
+    if (notes.length < 4) return 0;
+    const semis = new Set(notes.map(o => Math.round(12 * Math.log2(o.med / 440))));
+    if (semis.size < 2) return 0;
+    const meanLen = notes.reduce((s, o) => s + o.len, 0) / notes.length; if (meanLen < 12 || vf < 0.55) return 0;
+    return 0.55 + 0.06 * Math.min(5, notes.length - 4) + 0.2 * Math.min(1, (meanLen - 12) / 12) + (vf > 0.7 ? 0.1 : 0);
+  }
+  chat() {
+    const n = Math.min(this.count, 234); if (n < 150) return 0;
+    const vo = this.last(this.vo, n, this.s4), f = this.last(this.f0, n, this.s3), r = this.last(this.rel, n, this.s1);
+    let voiced = 0, runs = 0, run = 0, loud = 0; const fs = [];
+    for (let i = 0; i < n; i++) {
+      if (vo[i]) { voiced++; run++; fs.push(f[i]); loud += r[i]; } else { if (run >= 3) runs++; run = 0; }
+    }
+    if (run >= 3) runs++;
+    const vf = voiced / n; if (vf < 0.2 || vf > 0.8 || runs < 8) return 0;
+    const med = this.median(fs); if (med < 230) return 0;
+    if (loud / voiced < 8) return 0;
+    return 0.5 + 0.02 * Math.min(10, runs - 8) + 0.15 * Math.min(1, (med - 230) / 100);
+  }
+  shout() {
+    const n = Math.min(this.count, 28); if (n < 28) return 0;
+    const vo = this.last(this.vo, n, this.s4), f = this.last(this.f0, n, this.s3), r = this.last(this.rel, n, this.s1);
+    // a cheer or a shout: louder than this child's usual voice and held for ~0.5 s without a break
+    const need = Math.max(22, this.vref + 9);
+    let run = 0, best = 0, mx = 0;
+    for (let i = 0; i < n; i++) { if (r[i] >= need && vo[i] && f[i] >= 250) { run++; if (run > best) best = run; } else run = 0; if (r[i] > mx) mx = r[i]; }
+    return best >= 22 ? 0.72 + Math.min(0.2, (mx - need) * 0.02) : 0;
+  }
+}
+
+/* ---------- grouping detections into moments ---------- */
+class Grouper {
+  constructor(lenSec) { this.pre = Math.round(lenSec * 0.4 * SR); this.post = Math.round(lenSec * 0.6 * SR); this.maxL = Math.round(lenSec * 1.5 * SR); this.cool = 12 * SR; this.cap = null; this.coolUntil = -Infinity; this.done = []; }
+  event(ev, minStart) {
+    if (this.cap && ev.at > this.cap.end) this.finish();
+    if (this.cap) {
+      // label the moment by what was heard most, not by one loud frame
+      const acc = this.cap.acc; acc[ev.type] = (acc[ev.type] || 0) + ev.score;
+      if (acc[ev.type] > acc[this.cap.type]) this.cap.type = ev.type;
+      if (ev.score > this.cap.score) this.cap.score = ev.score;
+      this.cap.end = Math.min(Math.max(this.cap.end, ev.at + (this.post >> 1)), this.cap.start + this.maxL);
+      return;
+    }
+    if (ev.at < this.coolUntil) return;
+    this.cap = { start: Math.max(minStart, ev.at - this.pre), end: ev.at + this.post, type: ev.type, score: ev.score, trig: ev.at, acc: { [ev.type]: ev.score } };
+  }
+  finish() { if (this.cap) { this.done.push(this.cap); this.coolUntil = this.cap.end + this.cool; this.cap = null; } }
+  advance(abs) { if (this.cap && abs >= this.cap.end) this.finish(); const d = this.done; this.done = []; return d; }
+}
+
+/* ---------- audio helpers ---------- */
+class Resampler {
+  constructor(inSr) { this.r = inSr / SR; this.t = 0; this.prev = 0; this.p1 = 0; this.p2 = 0; }
+  process(x) {
+    if (this.r === 1) return x;
+    const n = x.length, y = new Float32Array(n);
+    for (let i = 0; i < n; i++) { const v = x[i]; y[i] = 0.25 * this.p2 + 0.5 * this.p1 + 0.25 * v; this.p2 = this.p1; this.p1 = v; }
+    const out = new Float32Array(Math.ceil((n - this.t) / this.r) + 2);
+    let k = 0, t = this.t;
+    while (t < n - 1) { const i = Math.floor(t), fr = t - i; const a = i < 0 ? this.prev : y[i]; out[k++] = a + (y[i + 1] - a) * fr; t += this.r; }
+    this.t = t - n; this.prev = y[n - 1];
+    return out.subarray(0, k);
+  }
+}
+function fade(x) { const n = Math.min(Math.round(0.25 * SR), x.length >> 2); for (let i = 0; i < n; i++) { const g = i / n; x[i] *= g; x[x.length - 1 - i] *= g; } return x; }
+function peaksOf(x, buckets = 64) {
+  const out = new Array(buckets).fill(0), step = x.length / buckets; let mx = 1e-6;
+  for (let b = 0; b < buckets; b++) { let p = 0; const s = Math.floor(b * step), e = Math.floor((b + 1) * step); for (let i = s; i < e; i++) { const v = Math.abs(x[i]); if (v > p) p = v; } out[b] = p; if (p > mx) mx = p; }
+  return out.map(v => Math.round(Math.sqrt(v / mx) * 100) / 100);
+}
+function wav(x) {
+  const n = x.length, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const s = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
+  s(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); s(8, 'WAVE'); s(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, SR, true); v.setUint32(28, SR * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); s(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) { const c = Math.max(-1, Math.min(1, x[i])); v.setInt16(44 + i * 2, c < 0 ? c * 0x8000 : c * 0x7fff, true); }
+  return new Blob([buf], { type: 'audio/wav' });
+}
+
+/* ---------- storage ---------- */
+const store = {
+  db: null, mem: new Map(),
+  async open() {
+    try {
+      this.db = await new Promise((res, rej) => {
+        const rq = indexedDB.open('kehai', 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore('moments', { keyPath: 'id' });
+        rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+      });
+    } catch (e) { this.db = null; }
+  },
+  tx(mode, fn) { return new Promise((res, rej) => { const t = this.db.transaction('moments', mode); const r = fn(t.objectStore('moments')); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); }); },
+  async all() { if (!this.db) return [...this.mem.values()]; try { return await this.tx('readonly', s => s.getAll()); } catch (e) { return [...this.mem.values()]; } },
+  async put(m) { this.mem.set(m.id, m); if (this.db) try { await this.tx('readwrite', s => s.put(m)); } catch (e) {} },
+  async del(id) { this.mem.delete(id); if (this.db) try { await this.tx('readwrite', s => s.delete(id)); } catch (e) {} },
+  async clear() { this.mem.clear(); if (this.db) try { await this.tx('readwrite', s => s.clear()); } catch (e) {} }
+};
+let moments = [];
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+const dayKey = ts => { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
+async function saveMoment(samples, meta) {
+  const x = fade(samples);
+  const m = { id: uid(), ts: meta.ts, dur: x.length / SR, tag: meta.type, score: Math.round(meta.score * 100) / 100, peaks: peaksOf(x), fav: false, note: '', src: meta.src, file: meta.file || '', blob: wav(x) };
+  if (meta.src === 'live') {
+    const today = moments.filter(o => dayKey(o.ts) === dayKey(m.ts));
+    if (today.length >= settings.cap) {
+      const weakest = today.filter(o => !o.fav).sort((a, b) => a.score - b.score)[0];
+      if (!weakest || weakest.score >= m.score) return null;
+      await store.del(weakest.id); moments = moments.filter(o => o.id !== weakest.id);
+    }
+  }
+  await store.put(m); moments.push(m);
+  return m;
+}
+
+/* ---------- live listening ---------- */
+const live = {
+  on: false, ctx: null, stream: null, node: null, det: null, grp: null, rs: null, ring: null, abs: 0, startedAt: 0, capturing: false, statTimer: 0,
+  async start() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error('nomedia');
+    const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 };
+    if (settings.mic) audio.deviceId = { exact: settings.mic };
+    const AC = window.AudioContext || window.webkitAudioContext;
+    this.ctx = new AC();
+    try { this.stream = await navigator.mediaDevices.getUserMedia({ audio }); }
+    catch (e) { try { await this.ctx.close(); } catch (_) {} this.ctx = null; throw e; }
+    if (this.ctx.state === 'suspended') await this.ctx.resume();
+    const src = this.ctx.createMediaStreamSource(this.stream);
+    this.rs = new Resampler(this.ctx.sampleRate); this.det = new Detector(); this.det.setSens(SENS[settings.sens] || 1);
+    this.grp = new Grouper(settings.len); this.ring = new Float32Array(SR * 60); this.abs = 0;
+    const onChunk = ch => this.onChunk(ch);
+    let ok = false;
+    if (this.ctx.audioWorklet && window.AudioWorkletNode) {
+      try {
+        const code = "class T extends AudioWorkletProcessor{constructor(){super();this.b=new Float32Array(2048);this.n=0}process(i){const c=i[0]&&i[0][0];if(c){for(let k=0;k<c.length;k++){this.b[this.n++]=c[k];if(this.n===2048){this.port.postMessage(this.b.slice(0));this.n=0}}}return true}}registerProcessor('kehai-tap',T);";
+        const url = URL.createObjectURL(new Blob([code], { type: 'application/javascript' }));
+        await this.ctx.audioWorklet.addModule(url);
+        this.node = new AudioWorkletNode(this.ctx, 'kehai-tap', { numberOfInputs: 1, numberOfOutputs: 0 });
+        this.node.port.onmessage = e => onChunk(e.data); src.connect(this.node); ok = true;
+      } catch (e) { ok = false; }
+    }
+    if (!ok) {
+      this.node = this.ctx.createScriptProcessor(2048, 1, 1);
+      this.node.onaudioprocess = e => onChunk(new Float32Array(e.inputBuffer.getChannelData(0)));
+      const g = this.ctx.createGain(); g.gain.value = 0; src.connect(this.node); this.node.connect(g); g.connect(this.ctx.destination);
+    }
+    this.on = true; this.startedAt = Date.now(); this.lastStat = Date.now();
+    this.statTimer = setInterval(() => this.tickStats(), 5000);
+    refreshMics();
+  },
+  async stop() {
+    this.tickStats();
+    clearInterval(this.statTimer);
+    if (this.grp && this.grp.cap) { this.grp.cap.end = Math.min(this.grp.cap.end, this.abs); this.grp.finish(); await this.flush(this.grp.advance(this.abs)); }
+    try { this.node && this.node.disconnect(); } catch (e) {}
+    try { this.stream && this.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+    try { this.ctx && await this.ctx.close(); } catch (e) {}
+    this.on = false; this.capturing = false; this.node = this.stream = this.ctx = null;
+  },
+  tickStats() {
+    if (!this.on) return;
+    const now = Date.now(), k = dayKey(now); const add = (now - this.lastStat) / 1000; this.lastStat = now;
+    stats[k] = (stats[k] || 0) + add; saveJSON('kehai.stats', stats); renderToday();
+  },
+  onChunk(ch) {
+    const y = this.rs.process(ch), L = this.ring.length;
+    for (let i = 0; i < y.length; i++) this.ring[(this.abs + i) % L] = y[i];
+    const evs = this.det.feed(y);
+    this.abs += y.length;
+    const minStart = Math.max(0, this.abs - L + SR);
+    for (const ev of evs) this.grp.event(ev, minStart);
+    const was = this.capturing; this.capturing = !!this.grp.cap;
+    if (this.capturing && !was) ui.capturing(this.grp.cap.type);
+    const done = this.grp.advance(this.abs);
+    if (done.length) this.flush(done);
+  },
+  async flush(done) {
+    const L = this.ring.length;
+    for (const c of done) {
+      const start = Math.max(c.start, this.abs - L), end = Math.min(c.end, this.abs);
+      if (end - start < SR * 2) continue;
+      const x = new Float32Array(end - start);
+      for (let i = 0; i < x.length; i++) x[i] = this.ring[(start + i) % L];
+      const ts = Date.now() - ((this.abs - start) / SR) * 1000;
+      const m = await saveMoment(x, { ts, type: c.type, score: c.score, src: 'live' });
+      if (m) ui.saved(m);
+    }
+  }
+};
+
+/* ---------- file import ---------- */
+async function importFile(file) {
+  const prog = $('#fileProg'), bar = $('#fileBar'), msg = $('#fileMsg');
+  prog.hidden = false; bar.style.width = '0%'; msg.textContent = '音を読み込んでいます…';
+  try {
+    const buf = await file.arrayBuffer();
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const octx = new OAC(1, SR, SR);
+    const ab = await new Promise((res, rej) => { const p = octx.decodeAudioData(buf, res, rej); if (p && p.then) p.then(res, rej); });
+    const n = ab.length, x = new Float32Array(n);
+    for (let c = 0; c < ab.numberOfChannels; c++) { const d = ab.getChannelData(c); for (let i = 0; i < n; i++) x[i] += d[i] / ab.numberOfChannels; }
+    const det = new Detector(); det.setSens(SENS[settings.sens] || 1);
+    const grp = new Grouper(settings.len); const caps = [];
+    const CH = HOP * 200; let pos = 0;
+    while (pos < n) {
+      const evs = det.feed(x.subarray(pos, Math.min(n, pos + CH)));
+      pos = Math.min(n, pos + CH);
+      for (const ev of evs) grp.event(ev, 0);
+      caps.push(...grp.advance(pos));
+      bar.style.width = Math.round(pos / n * 100) + '%';
+      msg.textContent = '耳をすませています… ' + fmtDur(pos / SR) + ' / ' + fmtDur(n / SR);
+      await new Promise(r => setTimeout(r, 0));
+    }
+    if (grp.cap) { grp.cap.end = Math.min(grp.cap.end, n); grp.finish(); caps.push(...grp.advance(n)); }
+    const limit = Math.max(3, Math.min(settings.cap, Math.ceil(n / SR / 60) * 2));
+    const chosen = caps.filter(c => c.end - c.start >= SR * 2).sort((a, b) => b.score - a.score).slice(0, limit).sort((a, b) => a.start - b.start);
+    const base = (file.lastModified || Date.now()) - (n / SR) * 1000;
+    for (const c of chosen) {
+      const seg = x.slice(c.start, Math.min(n, c.end));
+      await saveMoment(seg, { ts: base + (c.start / SR) * 1000, type: c.type, score: c.score, src: 'file', file: file.name });
+    }
+    bar.style.width = '100%';
+    msg.textContent = chosen.length ? fmtDur(n / SR) + 'の音から、' + chosen.length + 'つの瞬間を拾いました。時刻はファイルの日時から推定しています。' : fmtDur(n / SR) + 'の音を聴きましたが、拾える瞬間は見つかりませんでした。「せってい」で感度を上げると拾いやすくなります。';
+    if (chosen.length) { render(); ui.toast(chosen.length + 'つの瞬間を拾いました'); $('#newDot').hidden = false; }
+    return chosen.length;
+  } catch (e) {
+    msg.textContent = 'このファイルは読み込めませんでした。音声ファイル（m4a・mp3・wav）か、動画（mp4・mov）を選んでください。';
+    return -1;
+  }
+}
+
+/* ---------- playback ---------- */
+const player = { audio: new Audio(), id: null, url: null, queue: [], raf: 0 };
+player.audio.addEventListener('ended', () => { const next = player.queue.shift(); if (next) play(next, true); else stopPlay(); });
+function stopPlay() { player.audio.pause(); if (player.url) URL.revokeObjectURL(player.url); player.url = null; player.id = null; player.queue = []; cancelAnimationFrame(player.raf); updatePlayUI(); }
+function play(id, fromQueue) {
+  if (!fromQueue) player.queue = [];
+  if (player.id === id && !fromQueue) { if (player.audio.paused) player.audio.play(); else player.audio.pause(); updatePlayUI(); return; }
+  const m = moments.find(o => o.id === id); if (!m) return;
+  if (player.url) URL.revokeObjectURL(player.url);
+  player.url = URL.createObjectURL(m.blob); player.id = id; player.audio.src = player.url;
+  player.audio.play().catch(() => {}); updatePlayUI();
+  const tick = () => { updateProgress(); player.raf = requestAnimationFrame(tick); };
+  cancelAnimationFrame(player.raf); player.raf = requestAnimationFrame(tick);
+}
+function updatePlayUI() {
+  document.querySelectorAll('.moment[data-id]').forEach(li => {
+    const on = li.dataset.id === player.id && !player.audio.paused;
+    const b = li.querySelector('.play'); b.classList.toggle('playing', on); b.innerHTML = on ? ICON.pause : ICON.play; b.setAttribute('aria-label', on ? '一時停止' : '再生');
+  });
+  updateProgress();
+}
+function updateProgress() {
+  document.querySelectorAll('.moment[data-id] .wave rect.clip').forEach(r => {
+    const id = r.closest('.moment').dataset.id;
+    const p = id === player.id && player.audio.duration ? player.audio.currentTime / player.audio.duration : 0;
+    r.setAttribute('width', (p * 64).toFixed(2));
+  });
+}
+
+/* ---------- rendering ---------- */
+const ICON = {
+  play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5l-1.4-1.3C5.4 14.5 2 11.4 2 7.6 2 4.5 4.4 2 7.5 2c1.7 0 3.4.8 4.5 2.1C13.1 2.8 14.8 2 16.5 2 19.6 2 22 4.5 22 7.6c0 3.8-3.4 6.9-8.6 11.6z"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12H7z"/></svg>'
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtTime = ts => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+const fmtDur = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60; return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(ss).padStart(2, '0') : m + ':' + String(ss).padStart(2, '0'); };
+const fmtMin = s => { const m = Math.floor(s / 60); return m >= 60 ? Math.floor(m / 60) + '時間' + (m % 60) + '分' : m + '分'; };
+const dayLabel = k => { const [y, mo, d] = k.split('-').map(Number); const dt = new Date(y, mo - 1, d); return mo + '月' + d + '日（' + '日月火水木金土'[dt.getDay()] + '）'; };
+function waveSVG(peaks, id) {
+  let bars = '';
+  peaks.forEach((p, i) => { const h = Math.max(1.2, p * 22); bars += '<rect x="' + (i + 0.2) + '" y="' + (13 - h / 2).toFixed(2) + '" width="0.6" height="' + h.toFixed(2) + '" rx="0.3"/>'; });
+  const cid = 'c' + String(id).replace(/[^a-z0-9]/gi, '');
+  return '<svg class="wave" viewBox="0 0 64 26" preserveAspectRatio="none" aria-hidden="true"><defs><clipPath id="' + cid + '"><rect class="clip" x="0" y="0" width="0" height="26"/></clipPath></defs>' +
+    '<g fill="currentColor" opacity=".28">' + bars + '</g><g fill="currentColor" clip-path="url(#' + cid + ')">' + bars + '</g></svg>';
+}
+function momentHTML(m, example) {
+  return '<li class="moment tag-' + m.tag + (example ? ' example' : '') + '"' + (example ? '' : ' data-id="' + m.id + '"') + '>' +
+    '<button class="play" type="button" ' + (example ? 'disabled aria-label="見本のため再生できません"' : 'data-act="play" aria-label="再生"') + '>' + ICON.play + '</button>' +
+    '<div class="m-body"><div class="m-meta"><span class="time">' + fmtTime(m.ts) + '</span><span class="chip">' + TAGS[m.tag] + '</span><span>' + fmtDur(m.dur) + '</span>' + (m.src === 'file' ? '<span>ファイルから</span>' : '') + (example ? '<span>見本</span>' : '') + '</div>' +
+    waveSVG(m.peaks, m.id) +
+    (example ? '<span class="note-in">' + esc(m.note) + '</span>' : '<input class="note-in" type="text" id="note-' + m.id + '" maxlength="60" placeholder="ひとことメモ" value="' + esc(m.note) + '" aria-label="ひとことメモ">') + '</div>' +
+    (example ? '<div></div>' : '<div class="m-tools"><button class="icon" type="button" data-act="fav" aria-label="お気に入り" aria-pressed="' + (m.fav ? 'true' : 'false') + '">' + ICON.heart + '</button><button class="icon" type="button" data-act="del" aria-label="消す">' + ICON.trash + '</button></div>') +
+    '</li>';
+}
+function examplePeaks(seed, shape) {
+  const out = []; let s = seed;
+  for (let i = 0; i < 64; i++) { s = (s * 9301 + 49297) % 233280; const r = s / 233280; const t = i / 63; out.push(Math.max(0.05, Math.min(1, shape(t, r)))); }
+  return out;
+}
+const EXAMPLES = (() => {
+  const now = new Date(); now.setHours(0, 0, 0, 0); const base = now.getTime();
+  return [
+    { id: 'ex1', ts: base + (7 * 60 + 42) * 60000, dur: 20, tag: 'sing', note: 'お風呂のうた', peaks: examplePeaks(3, (t, r) => 0.25 + 0.6 * Math.abs(Math.sin(t * 19)) * (t > 0.3 && t < 0.9 ? 1 : 0.3) + r * 0.1) },
+    { id: 'ex2', ts: base + (17 * 60 + 5) * 60000, dur: 22, tag: 'laugh', note: '帰りの車で止まらない笑い', peaks: examplePeaks(7, (t, r) => (t > 0.38 && t < 0.7 ? 0.5 + r * 0.5 : 0.12 + r * 0.15)) },
+    { id: 'ex3', ts: base + (19 * 60 + 30) * 60000, dur: 20, tag: 'chat', note: '「あのね、きょうね」', peaks: examplePeaks(11, (t, r) => (r > 0.45 ? 0.3 + r * 0.55 : 0.1 + r * 0.2) * (t > 0.35 ? 1 : 0.4)) }
+  ];
+})();
+function render() {
+  const wrap = $('#days');
+  if (!moments.length) {
+    wrap.innerHTML = '<section class="day"><header class="day-head"><div><h2>見本の一日</h2><p>実際に拾われると、日ごとにここへ並びます</p></div></header><ol class="moments">' + EXAMPLES.map(m => momentHTML(m, true)).join('') + '</ol></section>' +
+      '<p class="empty-note" style="margin-top:16px">まだ瞬間はありません。「きく」で耳をすますか、録音ファイルから拾ってみてください。</p>';
+  } else {
+    const byDay = {};
+    for (const m of moments) (byDay[dayKey(m.ts)] = byDay[dayKey(m.ts)] || []).push(m);
+    wrap.innerHTML = Object.keys(byDay).sort().reverse().map(k => {
+      const list = byDay[k].sort((a, b) => a.ts - b.ts); const total = list.reduce((s, m) => s + m.dur, 0);
+      const listened = stats[k] ? fmtMin(stats[k]) + '耳をすませて、' : '';
+      return '<section class="day"><header class="day-head"><div><h2>' + dayLabel(k) + '</h2><p>' + listened + list.length + 'つの瞬間 · 合計' + fmtDur(total) + '</p></div>' +
+        '<button class="btn small" type="button" data-act="playday" data-day="' + k + '">通して聴く</button></header><ol class="moments">' + list.map(m => momentHTML(m, false)).join('') + '</ol></section>';
+    }).join('');
+  }
+  updatePlayUI(); renderToday(); renderUsage();
+}
+function renderToday() {
+  const k = dayKey(Date.now());
+  const n = moments.filter(m => dayKey(m.ts) === k).length;
+  $('#todayCount').textContent = n; $('#todayListen').textContent = fmtMin(stats[k] || 0);
+  $('#pSub').textContent = 'きょう ' + n + ' の瞬間';
+}
+function renderUsage() {
+  if (!moments.length) { $('#usage').textContent = '保存している瞬間はありません。'; return; }
+  const bytes = moments.reduce((s, m) => s + (m.blob ? m.blob.size : 0), 0);
+  $('#usage').textContent = moments.length + 'つの瞬間を、この端末に保存しています（約' + (bytes / 1048576).toFixed(1) + 'MB）。';
+}
+
+/* ---------- UI ---------- */
+const ui = {
+  t: 0,
+  toast(text) { const el = $('#toast'); el.textContent = text; el.classList.add('show'); clearTimeout(this.t); this.t = setTimeout(() => el.classList.remove('show'), 2600); },
+  capturing(type) { $('#pocket').classList.add('cap'); },
+  saved(m) { $('#pocket').classList.remove('cap'); render(); $('#newDot').hidden = false; this.toast(TAGS[m.tag] + 'を拾いました'); }
+};
+function setView(v) {
+  document.querySelectorAll('.tabs button').forEach(b => { if (b.dataset.view === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  ['listen', 'log', 'settings'].forEach(n => { $('#view-' + n).hidden = n !== v; });
+  if (v === 'log') $('#newDot').hidden = true;
+  try { sessionStorage.setItem('kehai.view', v); } catch (e) {}
+  window.scrollTo(0, 0);
+}
+document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('button[data-view]'); if (b) setView(b.dataset.view); });
+
+const btnListen = $('#btnListen'), btnPocket = $('#btnPocket'), micNote = $('#micNote');
+if (inViewer) { micNote.hidden = false; micNote.textContent = 'claude.ai の中ではマイクを使えないため、ここでは「録音ファイルから拾う」で試せます。その場で耳をすますには、単体版（index.html）をブラウザで開いてください。'; }
+btnListen.addEventListener('click', async () => {
+  if (live.on) {
+    await live.stop(); releaseWake();
+    btnListen.textContent = '耳をすます'; btnListen.classList.remove('on'); btnPocket.hidden = true; kick(); return;
+  }
+  btnListen.disabled = true;
+  try {
+    await live.start();
+    btnListen.textContent = 'やめる'; btnListen.classList.add('on'); btnPocket.hidden = false; micNote.hidden = true; kick();
+  } catch (e) {
+    micNote.hidden = false;
+    micNote.textContent = (e && e.name === 'NotAllowedError') || inViewer
+      ? 'マイクを使えませんでした。ブラウザでマイクを許可するか、「録音ファイルから拾う」を使ってください。'
+      : 'マイクを開けませんでした。マイクがつながっているか確かめてください。';
+  } finally { btnListen.disabled = false; }
+});
+
+let wake = null;
+async function holdWake() { try { if ('wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); } catch (e) { wake = null; } }
+function releaseWake() { try { wake && wake.release(); } catch (e) {} wake = null; }
+btnPocket.addEventListener('click', () => { $('#pocket').hidden = false; holdWake(); });
+// leaving pocket mode resumes the drawing loop
+let lastTap = 0;
+$('#pocket').addEventListener('click', () => { const now = Date.now(); if (now - lastTap < 400) { $('#pocket').hidden = true; releaseWake(); kick(); } lastTap = now; });
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); return; }
+  if (live.on && hiddenAt && Date.now() - hiddenAt > 5000) ui.toast('画面を閉じていた' + fmtDur((Date.now() - hiddenAt) / 1000) + 'は、聞こえていなかった可能性があります');
+  if (!$('#pocket').hidden) holdWake();
+  hiddenAt = 0;
+});
+
+$('#fileIn').addEventListener('change', async e => { const f = e.target.files && e.target.files[0]; if (f) await importFile(f); e.target.value = ''; });
+
+$('#days').addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'playday') { const ids = moments.filter(m => dayKey(m.ts) === b.dataset.day).sort((a, c) => a.ts - c.ts).map(m => m.id); if (ids.length) { play(ids[0]); player.queue = ids.slice(1); } return; }
+  const li = b.closest('.moment'); const id = li && li.dataset.id; const m = moments.find(o => o.id === id); if (!m) return;
+  if (act === 'play') play(id);
+  if (act === 'fav') { m.fav = !m.fav; b.setAttribute('aria-pressed', m.fav ? 'true' : 'false'); await store.put(m); }
+  if (act === 'del') {
+    if (!b.classList.contains('confirm')) { b.classList.add('confirm'); b.textContent = '消す'; setTimeout(() => { if (b.isConnected && b.classList.contains('confirm')) { b.classList.remove('confirm'); b.innerHTML = ICON.trash; } }, 3000); return; }
+    if (player.id === id) stopPlay();
+    await store.del(id); moments = moments.filter(o => o.id !== id); render();
+  }
+});
+$('#days').addEventListener('change', async e => {
+  if (!e.target.classList.contains('note-in')) return;
+  const id = e.target.closest('.moment').dataset.id; const m = moments.find(o => o.id === id); if (!m) return;
+  m.note = e.target.value.trim(); await store.put(m);
+});
+
+/* settings */
+const sensInput = $('#sens-' + settings.sens); if (sensInput) sensInput.checked = true;
+document.querySelectorAll('input[name="sens"]').forEach(r => r.addEventListener('change', () => { settings.sens = r.value; saveJSON('kehai.settings', settings); if (live.det) live.det.setSens(SENS[settings.sens]); }));
+$('#lenSel').value = String(settings.len); $('#capSel').value = String(settings.cap);
+$('#lenSel').addEventListener('change', e => { settings.len = Number(e.target.value); saveJSON('kehai.settings', settings); });
+$('#capSel').addEventListener('change', e => { settings.cap = Number(e.target.value); saveJSON('kehai.settings', settings); });
+$('#micSel').addEventListener('change', e => { settings.mic = e.target.value; saveJSON('kehai.settings', settings); if (live.on) ui.toast('次に耳をすますときから、このマイクを使います'); });
+async function refreshMics() {
+  try {
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audioinput' && d.deviceId && d.deviceId !== 'default');
+    const sel = $('#micSel'); sel.innerHTML = '<option value="">端末の標準マイク</option>' + devs.map((d, i) => '<option value="' + esc(d.deviceId) + '">' + esc(d.label || 'マイク ' + (i + 1)) + '</option>').join('');
+    sel.value = settings.mic && devs.some(d => d.deviceId === settings.mic) ? settings.mic : '';
+  } catch (e) {}
+}
+const btnWipe = $('#btnWipe');
+btnWipe.addEventListener('click', async () => {
+  if (!moments.length) return;
+  if (btnWipe.dataset.confirm !== '1') { btnWipe.dataset.confirm = '1'; btnWipe.textContent = 'もう一度押すと、すべて消えます'; setTimeout(() => { btnWipe.dataset.confirm = ''; btnWipe.textContent = 'すべて消す'; }, 4000); return; }
+  stopPlay(); await store.clear(); moments = []; btnWipe.dataset.confirm = ''; btnWipe.textContent = 'すべて消す'; render(); ui.toast('すべて消しました');
+});
+
+/* zip export (store only) */
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zip(files) {
+  const enc = new TextEncoder(), parts = [], central = []; let off = 0;
+  const d = new Date(), dt = ((d.getFullYear() - 1980) << 9 | (d.getMonth() + 1) << 5 | d.getDate()), tm = (d.getHours() << 11 | d.getMinutes() << 5 | (d.getSeconds() >> 1));
+  for (const f of files) {
+    const name = enc.encode(f.name), crc = crc32(f.data), h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, tm, true); h.setUint16(12, dt, true);
+    h.setUint32(14, crc, true); h.setUint32(18, f.data.length, true); h.setUint32(22, f.data.length, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    parts.push(h.buffer, name, f.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, tm, true); c.setUint16(14, dt, true);
+    c.setUint32(16, crc, true); c.setUint32(20, f.data.length, true); c.setUint32(24, f.data.length, true); c.setUint16(28, name.length, true); c.setUint32(42, off, true);
+    central.push(c.buffer, name);
+    off += 30 + name.length + f.data.length;
+  }
+  const cdSize = central.reduce((s, p) => s + (p.byteLength || p.length), 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+  return new Blob([...parts, ...central, e.buffer], { type: 'application/zip' });
+}
+$('#btnExport').addEventListener('click', async () => {
+  if (!moments.length) { ui.toast('保存する瞬間がまだありません'); return; }
+  const files = [], index = [];
+  for (const m of moments.slice().sort((a, b) => a.ts - b.ts)) {
+    const d = new Date(m.ts); const name = dayKey(m.ts) + '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + String(d.getSeconds()).padStart(2, '0') + '_' + TAGS[m.tag] + '.wav';
+    files.push({ name, data: new Uint8Array(await m.blob.arrayBuffer()) });
+    index.push({ file: name, time: new Date(m.ts).toISOString(), tag: TAGS[m.tag], seconds: Math.round(m.dur), favorite: m.fav, note: m.note, source: m.src === 'file' ? 'ファイル: ' + m.file : 'ライブ' });
+  }
+  files.push({ name: 'moments.json', data: new TextEncoder().encode(JSON.stringify(index, null, 2)) });
+  const blob = zip(files), filename = 'kehai-' + dayKey(Date.now()) + '.zip';
+  let dl = null;
+  if (inViewer) { try { dl = await window.claude.use('downloads'); } catch (e) { dl = null; } }
+  if (dl) { try { await dl.save({ filename, data: blob }); ui.toast('保存しました'); } catch (e) { if (e && e.code !== 'declined') ui.toast('この画面では保存できませんでした'); } return; }
+  if (inViewer) { ui.toast('この画面では保存できませんでした'); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+});
+
+/* ---------- the ear ---------- */
+const ear = $('#ear'), ectx = ear.getContext('2d');
+const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let ripples = [], lastRipple = 0;
+function sizeEar() { const r = ear.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1); ear.width = Math.max(1, Math.round(r.width * dpr)); ear.height = Math.max(1, Math.round(r.height * dpr)); }
+let colors = null, colorsAt = 0, looping = false;
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function palette(t) { if (!colors || t - colorsAt > 1000) { colors = { ink: css('--ink'), line: css('--line'), accent: css('--accent') }; colorsAt = t; } return colors; }
+function kick() { if (!looping) { looping = true; requestAnimationFrame(loop); } }
+function loop(t) {
+  if (!$('#pocket').hidden) { $('#pState').textContent = live.capturing ? '拾っています' : '耳をすませています'; setTimeout(() => requestAnimationFrame(loop), 500); return; }
+  drawEar(t);
+  if (live.on || ripples.length) requestAnimationFrame(loop); else looping = false;
+}
+function drawEar(t) {
+  const W = ear.width, H = ear.height, cx = W / 2, cy = H / 2, R = W * 0.3;
+  ectx.clearRect(0, 0, W, H);
+  const { ink, line, accent } = palette(t);
+  const lvl = live.on && live.det ? live.det.level : 0;
+  const cap = live.on && live.capturing;
+  if (live.on && !reduce) {
+    const gap = 1400 - lvl * 900;
+    if (t - lastRipple > gap) { ripples.push({ t0: t, a: 0.18 + lvl * 0.5 }); lastRipple = t; }
+    ripples = ripples.filter(r => t - r.t0 < 3200);
+    for (const r of ripples) {
+      const p = (t - r.t0) / 3200;
+      ectx.beginPath(); ectx.arc(cx, cy, R + p * W * 0.19, 0, Math.PI * 2);
+      ectx.strokeStyle = cap ? accent : ink; ectx.globalAlpha = r.a * (1 - p); ectx.lineWidth = W * 0.004; ectx.stroke();
+    }
+    ectx.globalAlpha = 1;
+  }
+  ectx.beginPath(); ectx.arc(cx, cy, R + lvl * W * 0.05, 0, Math.PI * 2);
+  ectx.fillStyle = cap ? accent : ink; ectx.globalAlpha = cap ? 0.16 : (live.on ? 0.05 + lvl * 0.08 : 0.03); ectx.fill(); ectx.globalAlpha = 1;
+  ectx.lineWidth = W * (cap ? 0.008 : 0.004); ectx.strokeStyle = cap ? accent : (live.on ? ink : line); ectx.stroke();
+  // state text
+  const st = $('#earState'), tm = $('#earTime');
+  if (live.on) {
+    st.textContent = cap ? '拾っています' : (lvl > 0.35 ? '聞こえます' : '耳をすませています');
+    tm.textContent = fmtDur((Date.now() - live.startedAt) / 1000);
+    $('#pState').textContent = cap ? '拾っています' : '耳をすませています';
+  } else { st.textContent = 'しずかです'; tm.textContent = '止まっています'; ripples = []; }
+}
+window.addEventListener('resize', () => { sizeEar(); colors = null; kick(); });
+if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { colors = null; kick(); });
+
+/* ---------- boot ---------- */
+(async () => {
+  sizeEar(); kick();
+  await store.open();
+  moments = await store.all();
+  render();
+  try { const v = sessionStorage.getItem('kehai.view'); if (v) setView(v); } catch (e) {}
+})();
+
+window.__kehai = { Detector, Grouper, SR, importFile, get moments() { return moments; }, live };
+})();
+</script>
