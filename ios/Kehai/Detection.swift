@@ -6,6 +6,8 @@ import Foundation
 
 enum MomentTag: String, Codable, CaseIterable {
     case laugh, sing, chat, shout
+    /// only from Apple's sound classifier (the rule-based detector never says "cry")
+    case cry
 
     var label: String {
         switch self {
@@ -13,6 +15,7 @@ enum MomentTag: String, Codable, CaseIterable {
         case .sing: return "うた"
         case .chat: return "おしゃべり"
         case .shout: return "大きな声"
+        case .cry: return "泣き声"
         }
     }
 }
@@ -395,9 +398,9 @@ final class LinearResampler {
 
 enum WAV {
     /// 16-bit PCM mono at 24 kHz, with 0.25 s fades so clips don't click.
-    static func encode(_ input: [Float]) -> Data {
+    static func encode(_ input: [Float], fade: Bool = true) -> Data {
         var x = input
-        let fadeN = min(Int(0.25 * Double(Detector.sampleRate)), x.count >> 2)
+        let fadeN = fade ? min(Int(0.25 * Double(Detector.sampleRate)), x.count >> 2) : 0
         if fadeN > 0 {
             for i in 0..<fadeN {
                 let g = Float(i) / Float(fadeN)

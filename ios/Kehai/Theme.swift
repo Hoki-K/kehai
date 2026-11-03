@@ -16,6 +16,7 @@ enum Theme {
         case .sing: return Color(light: 0x3A8560, dark: 0x6CBB8E)
         case .chat: return Color(light: 0x4867B8, dark: 0x88A5EA)
         case .shout: return Color(light: 0xB9505B, dark: 0xE48A93)
+        case .cry: return Color(light: 0x7A62B0, dark: 0xB4A2E6)
         }
     }
 

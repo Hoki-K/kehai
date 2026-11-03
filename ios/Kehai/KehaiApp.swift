@@ -7,6 +7,7 @@ struct KehaiApp: App {
     @StateObject private var listener: Listener
     @StateObject private var player: Player
     @StateObject private var importer = FileImporter()
+    @StateObject private var enricher: Enricher
 
     init() {
         let store = MomentStore()
@@ -16,6 +17,7 @@ struct KehaiApp: App {
         _settings = StateObject(wrappedValue: settings)
         _listener = StateObject(wrappedValue: listener)
         _player = StateObject(wrappedValue: Player(store: store) { [weak listener] in listener?.isListening ?? false })
+        _enricher = StateObject(wrappedValue: Enricher(store: store, settings: settings))
     }
 
     var body: some Scene {
@@ -26,6 +28,7 @@ struct KehaiApp: App {
                 .environmentObject(listener)
                 .environmentObject(player)
                 .environmentObject(importer)
+                .environmentObject(enricher)
         }
     }
 }
@@ -35,6 +38,9 @@ struct ContentView: View {
     @EnvironmentObject private var listener: Listener
     @EnvironmentObject private var player: Player
     @EnvironmentObject private var importer: FileImporter
+    @EnvironmentObject private var enricher: Enricher
+    @EnvironmentObject private var settings: AppSettings
+    @Environment(\.scenePhase) private var scenePhase
     @State private var tab = 0
     @State private var unseen = 0
     @State private var toast: String?
@@ -79,6 +85,11 @@ struct ContentView: View {
         }
         .onChange(of: tab) { _, t in if t == 1 { unseen = 0 } }
         .onChange(of: player.playingID) { _, id in listener.setMuted(id != nil) }
+        // labels, transcripts and the switch to m4a happen after saving, one clip at a time
+        .onAppear { enricher.kick() }
+        .onChange(of: store.moments.count) { _, _ in enricher.kick() }
+        .onChange(of: settings.transcribe) { _, _ in enricher.kick() }
+        .onChange(of: scenePhase) { _, phase in if phase == .active { enricher.kick() } }
     }
 
     private func show(_ text: String) {

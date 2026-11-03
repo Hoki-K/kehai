@@ -51,10 +51,13 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Text("空気感を残すため、雑音除去や音量の自動調整はかけずに、そのまま残します。声をくっきりさせる処理は、あとから選べるようにする予定です。")
+                    Toggle("話した内容を文字にする", isOn: $settings.transcribe)
+                    Text("雑音除去はかけずに、その場の空気感ごと残します。小さく録れた瞬間は、保存するときに音量だけそろえます。")
                         .font(.footnote)
                         .foregroundStyle(Theme.muted)
-                } header: { Text("音の扱い") }
+                } header: { Text("音の扱い") } footer: {
+                    Text("文字にする処理も、種類（笑い声・うた など）の見分けも、この端末の中だけで行います。端末が日本語の端末内認識に対応していないときは、文字にしません。")
+                }
 
                 Section {
                     Text(usage).font(.footnote).foregroundStyle(Theme.muted)
@@ -114,7 +117,7 @@ struct SettingsView: View {
     private func refreshInputs() {
         let session = AVAudioSession.sharedInstance()
         if !listener.isListening && player.playingID == nil {
-            try? session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetoothA2DP, .mixWithOthers])
+            try? session.setCategory(.playAndRecord, mode: .default, options: Listener.sessionOptions)
         }
         inputs = (session.availableInputs ?? []).filter { $0.portType != .builtInMic && $0.portType != .bluetoothHFP }
     }

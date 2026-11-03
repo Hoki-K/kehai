@@ -226,6 +226,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "けはい";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "笑い声やおしゃべりを拾うために、マイクを使います。音の解析はこの端末の中だけで行い、どこにも送りません。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "拾った瞬間に、何を話していたかを文字で添えるために使います。文字にする処理はこの端末の中だけで行い、どこにも送りません。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -257,6 +258,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "けはい";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "笑い声やおしゃべりを拾うために、マイクを使います。音の解析はこの端末の中だけで行い、どこにも送りません。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "拾った瞬間に、何を話していたかを文字で添えるために使います。文字にする処理はこの端末の中だけで行い、どこにも送りません。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

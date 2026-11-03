@@ -53,6 +53,8 @@ final class Listener: ObservableObject {
         for o in observers { NotificationCenter.default.removeObserver(o) }
     }
 
+    static let sessionOptions: AVAudioSession.CategoryOptions = [.defaultToSpeaker, .allowBluetoothA2DP, .allowAirPlay, .mixWithOthers]
+
     // MARK: start / stop
 
     func start() {
@@ -71,9 +73,10 @@ final class Listener: ObservableObject {
     private func begin() {
         let session = AVAudioSession.sharedInstance()
         do {
-            // .measurement turns off the system's voice processing and automatic gain: we keep the room as it sounds.
+            // .default mode: the phone's normal microphone level. (.measurement kept the room "as is" but recorded
+            // 20-30 dB too quietly on an iPhone 15 Pro, which also broke the labels.) No echo cancelling either way.
             // No .allowBluetooth (HFP), so AirPods can play music without taking over the microphone.
-            try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetoothA2DP, .mixWithOthers])
+            try session.setCategory(.playAndRecord, mode: .default, options: Listener.sessionOptions)
             try session.setActive(true)
             applyPreferredInput()
             try startEngine()

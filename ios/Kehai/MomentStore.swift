@@ -1,17 +1,26 @@
+import AVFoundation
 import Foundation
 
 struct Moment: Identifiable, Codable, Equatable {
     let id: UUID
     let date: Date
     let duration: Double
-    let tag: MomentTag
+    var tag: MomentTag
     let score: Double
-    let peaks: [Double]
+    var peaks: [Double]
     var favorite: Bool
     var note: String
-    let fileName: String
+    var fileName: String
     /// name of the recording it came from, when it was picked from a file rather than heard live
     var sourceFile: String? = nil
+    /// what was said, from on-device speech recognition. nil = not tried yet, "" = nothing recognisable
+    var transcript: String? = nil
+    /// true once Apple's sound classifier has looked at the clip (the label may have changed)
+    var classified: Bool? = nil
+    /// true when the person picked the label by hand; nothing overrides it
+    var labelByUser: Bool? = nil
+    /// the sound classifier's strongest classes, for tuning (identifier: mean confidence)
+    var sounds: [String: Double]? = nil
 }
 
 /// Saved moments: WAV files in Documents/Moments (visible in the Files app) plus a small JSON index.
@@ -69,15 +78,11 @@ final class MomentStore: ObservableObject {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "yyyy-MM-dd_HHmmss"
-        var name = "\(f.string(from: date))_\(tag.rawValue).wav"
-        var n = 2
-        while FileManager.default.fileExists(atPath: folder.appendingPathComponent(name).path) {
-            name = "\(f.string(from: date))_\(tag.rawValue)_\(n).wav"
-            n += 1
-        }
-        do { try WAV.encode(samples).write(to: folder.appendingPathComponent(name), options: .atomic) } catch { return nil }
+        let base = "\(f.string(from: date))_\(tag.rawValue)"
+        let x = AudioClip.prepare(samples)
+        guard let name = AudioClip.write(x, in: folder, baseName: base) else { return nil }
         let m = Moment(id: UUID(), date: date, duration: Double(samples.count) / Double(Detector.sampleRate), tag: tag,
-                       score: (score * 100).rounded() / 100, peaks: WAV.peaks(samples), favorite: false, note: "", fileName: name,
+                       score: (score * 100).rounded() / 100, peaks: WAV.peaks(x), favorite: false, note: "", fileName: name,
                        sourceFile: sourceFile)
         moments.append(m)
         persist()
@@ -87,6 +92,21 @@ final class MomentStore: ObservableObject {
     func toggleFavorite(_ id: UUID) {
         guard let i = moments.firstIndex(where: { $0.id == id }) else { return }
         moments[i].favorite.toggle()
+        persist()
+    }
+
+    func setTag(_ id: UUID, _ tag: MomentTag, byUser: Bool) {
+        guard let i = moments.firstIndex(where: { $0.id == id }) else { return }
+        if !byUser && moments[i].labelByUser == true { return }
+        moments[i].tag = tag
+        if byUser { moments[i].labelByUser = true }
+        persist()
+    }
+
+    /// Results from the background work (classifier, transcription, format conversion).
+    func update(_ id: UUID, _ change: (inout Moment) -> Void) {
+        guard let i = moments.firstIndex(where: { $0.id == id }) else { return }
+        change(&moments[i])
         persist()
     }
 
@@ -129,6 +149,8 @@ final class AppSettings: ObservableObject {
     @Published var lengthSeconds: Int { didSet { d.set(lengthSeconds, forKey: "lengthSeconds") } }
     @Published var dailyCap: Int { didSet { d.set(dailyCap, forKey: "dailyCap") } }
     @Published var inputUID: String { didSet { d.set(inputUID, forKey: "inputUID") } }
+    /// write down what was said (on-device speech recognition only)
+    @Published var transcribe: Bool { didSet { d.set(transcribe, forKey: "transcribe") } }
 
     init() {
         sensitivity = Sensitivity(rawValue: d.string(forKey: "sensitivity") ?? "") ?? .mid
@@ -137,5 +159,6 @@ final class AppSettings: ObservableObject {
         let cap = d.integer(forKey: "dailyCap")
         dailyCap = [10, 20, 40].contains(cap) ? cap : 20
         inputUID = d.string(forKey: "inputUID") ?? ""
+        transcribe = d.object(forKey: "transcribe") as? Bool ?? true
     }
 }

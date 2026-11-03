@@ -1,3 +1,4 @@
+import AVKit
 import SwiftUI
 
 struct LogView: View {
@@ -43,6 +44,12 @@ struct LogView: View {
             .scrollContentBackground(.hidden)
             .background(Theme.bg.ignoresSafeArea())
             .navigationTitle("きろく")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    // where to play: this iPhone's speaker, a Bluetooth speaker, AirPlay
+                    RoutePicker().frame(width: 36, height: 36).accessibilityLabel("再生するスピーカーを選ぶ")
+                }
+            }
         }
     }
 
@@ -82,6 +89,7 @@ struct MomentRow: View {
     @EnvironmentObject private var player: Player
     @State private var note: String
     @FocusState private var editing: Bool
+    @State private var showAll = false
 
     init(moment: Moment) {
         self.moment = moment
@@ -103,13 +111,24 @@ struct MomentRow: View {
             .accessibilityLabel(playing ? "止める" : "再生")
 
             VStack(alignment: .leading, spacing: 6) {
-                MetaLine(date: moment.date, tag: moment.tag, duration: moment.duration, fromFile: moment.sourceFile != nil, example: false)
+                MetaLine(date: moment.date, tag: moment.tag, duration: moment.duration, fromFile: moment.sourceFile != nil, example: false) { t in
+                    store.setTag(moment.id, t, byUser: true)
+                }
                 if playing {
                     TimelineView(.animation(minimumInterval: 1.0 / 20)) { _ in
                         Waveform(peaks: moment.peaks, color: Theme.tag(moment.tag), progress: player.progress(of: moment.id))
                     }
                 } else {
                     Waveform(peaks: moment.peaks, color: Theme.tag(moment.tag), progress: 0)
+                }
+                if let t = moment.transcript, !t.isEmpty {
+                    Text("「" + t + "」")
+                        .font(.footnote)
+                        .foregroundStyle(Theme.ink.opacity(0.8))
+                        .lineLimit(showAll ? nil : 2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .onTapGesture { showAll.toggle() }
+                        .accessibilityLabel("話していたこと: " + t)
                 }
                 TextField("ひとことメモ", text: $note)
                     .font(.subheadline)
@@ -139,16 +158,22 @@ struct MetaLine: View {
     let duration: Double
     let fromFile: Bool
     let example: Bool
+    /// when set, tapping the label lets the person correct it
+    var onTag: ((MomentTag) -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 8) {
             Text(Format.time(date)).monospacedDigit().foregroundStyle(Theme.ink)
-            Text(tag.label)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(Theme.tag(tag))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 1)
-                .background(Capsule().fill(Theme.tag(tag).opacity(0.14)))
+            if let onTag {
+                Menu {
+                    ForEach(MomentTag.allCases, id: \.self) { t in
+                        Button(t.label) { onTag(t) }
+                    }
+                } label: { chip }
+                .accessibilityLabel(tag.label + "、タップで直せます")
+            } else {
+                chip
+            }
             Text(Format.duration(duration))
             if fromFile { Text("ファイルから") }
             if example { Text("見本") }
@@ -156,6 +181,28 @@ struct MetaLine: View {
         .font(.caption)
         .foregroundStyle(Theme.muted)
     }
+
+    private var chip: some View {
+        Text(tag.label)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(Theme.tag(tag))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 1)
+            .background(Capsule().fill(Theme.tag(tag).opacity(0.14)))
+    }
+}
+
+/// The system's output picker (speaker / Bluetooth / AirPlay).
+struct RoutePicker: UIViewRepresentable {
+    func makeUIView(context: Context) -> AVRoutePickerView {
+        let v = AVRoutePickerView()
+        v.prioritizesVideoDevices = false
+        v.activeTintColor = UIColor(Theme.accent)
+        v.tintColor = UIColor(Theme.muted)
+        return v
+    }
+
+    func updateUIView(_ uiView: AVRoutePickerView, context: Context) {}
 }
 
 /// 64 bars, square-root scaled when saved; the part already heard is drawn solid.
